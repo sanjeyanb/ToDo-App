@@ -1,0 +1,111 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Helvetica Neue', sans-serif;
+  background: linear-gradient(to right, #e0eafc, #cfdef3);
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+.login-wrapper {
+  background: white;
+  padding: 3rem;
+  border-radius: 24px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  max-width: 440px;
+  text-align: center;
+  animation: fadeIn 0.6s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.login-wrapper h2 {
+  color: #007aff;
+  margin-bottom: 1.8rem;
+  font-weight: 700;
+  font-size: 2rem;
+}
+
+.login-wrapper input {
+  width: 100%;
+  padding: 14px 16px;
+  margin-bottom: 1.2rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 14px;
+  font-size: 1rem;
+  background-color: #f9f9f9;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.login-wrapper input:focus {
+  border-color: #007aff;
+  box-shadow: 0 0 6px rgba(0, 122, 255, 0.3);
+  outline: none;
+  background-color: #fff;
+}
+
+.login-wrapper button {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(to right, #007aff, #005fcc);
+  color: white;
+  border: none;
+  font-size: 1rem;
+  font-weight: bold;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.3s;
+}
+
+.login-wrapper button:hover {
+  box-shadow: 0 8px 18px rgba(0, 122, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.social-login {
+  margin-top: 1.5rem;
+}
+
+.footer-note {
+  font-size: 0.9rem;
+  color: #777;
+  margin-top: 1.5rem;
+}
+
+#g_id_onload,
+.g_id_signin {
+  width: 100% !important;
+  display: flex;
+  justify-content: center;
+}
+
+.divider {
+  margin: 1.5rem 0;
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: #bbb;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #ddd;
+}
+
+.divider:not(:empty)::before {
+  margin-right: .75em;
+}
+
+.divider:not(:empty)::after {
+  margin-left: .75em;
+}

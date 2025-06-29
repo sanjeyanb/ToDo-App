@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TodoFlow - Smart Task Manager</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#007aff">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Helvetica Neue', sans-serif;
+      background: linear-gradient(to right, #e0eafc, #cfdef3);
+      color: #1c1c1e;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 60px 20px;
+      min-height: 100vh;
+    }
+    .app {
+      background: white;
+      width: 100%;
+      max-width: 500px;
+      padding: 2.5rem;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      animation: fadeIn 0.6s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(40px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    h1 {
+      font-size: 2.2rem;
+      text-align: center;
+      color: #007aff;
+      margin-bottom: 1.8rem;
+    }
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .controls button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1.2rem;
+      padding: 4px 10px;
+      border-radius: 8px;
+      transition: background 0.3s;
+    }
+    .controls button:hover { background: #eee; }
+    form {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    input[type="text"], input[type="date"] {
+      flex: 1 1 40%;
+      padding: 12px 16px;
+      border-radius: 12px;
+      border: 2px solid #dcdcdc;
+      font-size: 1rem;
+      transition: border-color 0.2s;
+    }
+    input:focus { outline: none; border-color: #007aff; }
+    button[type="submit"] {
+      flex: 1 1 auto;
+      background-color: #007aff;
+      border: none;
+      color: white;
+      font-weight: bold;
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    button[type="submit"]::before {
+      content: '+';
+      font-size: 1.2rem;
+      background: white;
+      color: #007aff;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+    }
+    button[type="submit"]:hover { background-color: #005fcc; }
+    ul { list-style: none; padding: 0; }
+    li {
+      padding: 14px 16px;
+      background: #f7f7f7;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.2s;
+    }
+    li:hover { background: #f0f0f0; }
+    li.completed span { text-decoration: line-through; color: #888; }
+    .actions button {
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      margin-left: 8px;
+      transition: transform 0.2s;
+    }
+    .actions button:hover { transform: scale(1.2); }
+    .complete { color: #28a745; }
+    .delete { color: #dc3545; }
+    .due-date {
+      font-size: 0.8rem;
+      color: #888;
+      margin-top: 4px;
+    }
+    @media (max-width: 600px) {
+      .app { padding: 1.5rem; }
+      form { flex-direction: column; }
+      form input, form button { width: 100%; }
+      form button { margin-top: 8px; }
+    }
+    .dark-mode { background: #1e1e1e; color: #f1f1f1; }
+    .dark-mode .app { background: #2a2a2a; color: #f1f1f1; }
+    .dark-mode input, .dark-mode button, .dark-mode li {
+      background: #3a3a3a;
+      color: #f1f1f1;
+      border-color: #555;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <h1>📝 TodoFlow</h1>
+    <div class="controls">
+      <span id="task-count">Tasks: 0</span>
+      <button id="toggle-dark">🌙</button>
+    </div>
+    <form id="todo-form">
+      <input type="text" id="todo-input" placeholder="What needs to be done?" required autofocus />
+      <input type="date" id="due-date" />
+      <button type="submit">Add</button>
+    </form>
+    <ul id="todo-list"></ul>
+  </div>
+  <script>
+    const form = document.getElementById("todo-form");
+    const input = document.getElementById("todo-input");
+    const dueInput = document.getElementById("due-date");
+    const list = document.getElementById("todo-list");
+    const count = document.getElementById("task-count");
+    const toggleDark = document.getElementById("toggle-dark");
+    let dark = false;
+
+    let todos = JSON.parse(localStorage.getItem("todos")) || [];
+
+    const saveTodos = () => localStorage.setItem("todos", JSON.stringify(todos));
+
+    const renderTodos = () => {
+      list.innerHTML = "";
+      todos.forEach((todo, index) => {
+        const li = document.createElement("li");
+        if (todo.completed) li.classList.add("completed");
+        li.innerHTML = `
+          <div>
+            <span>${todo.text}</span>
+            ${todo.due ? `<div class="due-date">Due: ${todo.due}</div>` : ''}
+          </div>
+          <div class="actions">
+            <button class="complete" title="Mark as done" data-index="${index}">✔</button>
+            <button class="delete" title="Delete task" data-index="${index}">✖</button>
+          </div>
+        `;
+        list.appendChild(li);
+      });
+      count.textContent = `Tasks: ${todos.length}`;
+    };
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const text = input.value.trim();
+      const due = dueInput.value;
+      if (!text) return;
+      todos.push({ text, due, completed: false });
+      input.value = "";
+      dueInput.value = "";
+      saveTodos();
+      renderTodos();
+    });
+
+    list.addEventListener("click", (e) => {
+      if (e.target.tagName !== "BUTTON") return;
+      const index = e.target.dataset.index;
+      if (e.target.classList.contains("delete")) {
+        if (confirm("Delete this task?")) {
+          todos.splice(index, 1);
+        }
+      } else if (e.target.classList.contains("complete")) {
+        todos[index].completed = !todos[index].completed;
+      }
+      saveTodos();
+      renderTodos();
+    });
+
+    toggleDark.addEventListener("click", () => {
+      dark = !dark;
+      document.body.classList.toggle("dark-mode", dark);
+      toggleDark.textContent = dark ? "☀️" : "🌙";
+    });
+
+    renderTodos();
+  </script>
+</body>
+</html>
